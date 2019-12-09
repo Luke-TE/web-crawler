@@ -13,21 +13,21 @@ def crawl_from_base(base_link, num_of_links):
         html_data = requests.get(base_link)
         html_parser = BeautifulSoup(html_data.text, 'html.parser')
 
-        # Get <a> tags with href attributes
+        # Get <a> tags
         a_tags = html_parser.find_all('a')
-        a_tags = filter(lambda x: x.get('href', '') != '', a_tags)
 
         # Get href links that start with "http"
-        hrefs = [a_tag['href'] for a_tag in a_tags if re.search("^http", a_tag['href'])]
-
-        # Add new URLs to links
-        links |= hrefs
+        for a_tag in a_tags:
+            if len(links) >= num_of_links:
+                return links
+            elif a_tag.get('href', '') != '' and re.search("^http", a_tag['href']):
+                links.add(a_tag['href'])
 
         # Update index to check next page
         link_index += 1
         base_link = links[link_index]
 
-    return links[:num_of_links]
+    return links
 
 
 def print_links(links):
